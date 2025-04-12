@@ -3,29 +3,35 @@
 namespace App\Http\Controllers;
 
 use App\Models\Home;
-use App\Models\ConsumptionHistory;
-use Illuminate\Http\Request;
+use App\Services\ConsumptionCalculator;
 
 class ConsumptionController extends Controller
 {
-    // Almacena un registro del consumo energético para un hogar en específico
-    public function store(Request $request, $homeId)
+    public function analyze(Home $home)
     {
-        $validated = $request->validate([
-            'consumption_kwh' => 'required|numeric',
-            'consumption_date'=> 'required|date',
-        ]);
-
-        $home = Home::findOrFail($homeId);
-        $home->consumptionHistories()->create($validated);
-
-        return redirect()->route('hogares.show', $homeId)->with('success', 'Consumo registrado.');
+        $this->authorize('view', $home);
+        
+        $calculator = new ConsumptionCalculator($home);
+        $analysis = $calculator->analyze();
+        
+        return view('consumption.analysis', compact('home', 'analysis'));
     }
 
-    // Muestra el historial de consumo del hogar
-    public function show($homeId)
+    public function history(Home $home)
     {
-        $home = Home::with('consumptionHistories')->findOrFail($homeId);
-        return view('consumption.show', compact('home'));
+        $this->authorize('view', $home);
+        $consumptions = $home->energyConsumptions()->latest()->paginate(12);
+        return view('consumption.history', compact('home', 'consumptions'));
+    }
+
+    public function storeAnalysis(Home $home)
+    {
+        $this->authorize('update', $home);
+        
+        $calculator = new ConsumptionCalculator($home);
+        $consumption = $calculator->saveCurrentConsumption();
+        
+        return redirect()->route('homes.consumption.history', $home)
+            ->with('success', 'Análisis de consumo guardado exitosamente');
     }
 }

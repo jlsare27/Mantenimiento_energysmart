@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateLightingsTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -14,9 +14,17 @@ class CreateLightingsTable extends Migration
         Schema::create('lightings', function (Blueprint $table) {
             $table->id();
             $table->foreignId('home_id')->constrained()->onDelete('cascade');
-            $table->string('bulb_type'); // Tipo de bombilla (LED, incandescente, etc.)
-            $table->integer('power');    // Potencia en Watts
-            $table->integer('quantity'); // Cantidad de luminarias
+            $table->enum('type', [
+                'incandescente', 
+                'halogena', 
+                'fluorescente', 
+                'LED', 
+                'otra'
+            ]);
+            $table->decimal('power', 6, 2); // potencia por unidad en W
+            $table->integer('quantity');
+            $table->decimal('hours_use', 5, 2); // horas diarias de uso
+            $table->string('location')->nullable(); // sala, cocina, etc.
             $table->timestamps();
         });
     }
@@ -28,4 +36,4 @@ class CreateLightingsTable extends Migration
     {
         Schema::dropIfExists('lightings');
     }
-}
+};

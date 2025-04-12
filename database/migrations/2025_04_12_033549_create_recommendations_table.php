@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateRecommendationsTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -14,8 +14,17 @@ class CreateRecommendationsTable extends Migration
         Schema::create('recommendations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('home_id')->constrained()->onDelete('cascade');
-            $table->string('title');       // Título de la recomendación
-            $table->text('description');   // Descripción detallada
+            $table->enum('type', [
+                'lighting', 
+                'appliance', 
+                'behavior', 
+                'tariff', 
+                'other'
+            ]);
+            $table->text('description');
+            $table->enum('priority', ['high', 'medium', 'low']);
+            $table->boolean('implemented')->default(false);
+            $table->decimal('potential_savings', 8, 2)->nullable(); // kWh/mes
             $table->timestamps();
         });
     }
@@ -27,4 +36,4 @@ class CreateRecommendationsTable extends Migration
     {
         Schema::dropIfExists('recommendations');
     }
-}
+};

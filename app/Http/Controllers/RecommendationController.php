@@ -3,36 +3,39 @@
 namespace App\Http\Controllers;
 
 use App\Models\Home;
-use Illuminate\Http\Request;
+use App\Models\Recommendation;
+use App\Services\RecommendationService;
 
 class RecommendationController extends Controller
 {
-    // Genera recomendaciones para un hogar basándose en el consumo total
-    public function generateRecommendations($homeId)
+    public function index(Home $home)
     {
-        $home = Home::with(['consumptionHistories', 'appliances', 'lightings', 'tariff'])->findOrFail($homeId);
-        // Ejemplo de lógica: sumar el consumo total y comparar con un umbral definido
-        $totalConsumption = $home->consumptionHistories()->sum('consumption_kwh');
-        $recommendationText = '';
-
-        if ($totalConsumption > 100) {
-            $recommendationText = "Tu consumo es alto. Considera optimizar el uso de electrodomésticos e iluminación y evalúa cambiar a dispositivos de mayor eficiencia.";
-        } else {
-            $recommendationText = "Tu consumo está en un rango adecuado. Sigue manteniendo buenos hábitos y monitoreando el uso de energía.";
-        }
-
-        $home->recommendations()->create([
-            'title'       => 'Análisis de consumo energético',
-            'description' => $recommendationText,
-        ]);
-
-        return redirect()->route('hogares.show', $homeId)->with('success', 'Recomendaciones generadas.');
+        $this->authorize('view', $home);
+        
+        $recommendations = $home->recommendations()
+            ->orderBy('priority', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+            
+        return view('recommendations.index', compact('home', 'recommendations'));
     }
 
-    // Muestra las recomendaciones registradas para un hogar
-    public function index($homeId)
+    public function generate(Home $home, RecommendationService $service)
     {
-        $home = Home::with('recommendations')->findOrFail($homeId);
-        return view('recommendations.index', compact('home'));
+        $this->authorize('update', $home);
+        
+        $service->generateForHome($home);
+        
+        return redirect()->route('homes.recommendations.index', $home)
+            ->with('success', 'Nuevas recomendaciones generadas');
+    }
+
+    public function markAsImplemented(Home $home, Recommendation $recommendation)
+    {
+        $this->authorize('update', $home);
+        
+        $recommendation->update(['implemented' => true]);
+        
+        return back()->with('success', 'Recomendación marcada como implementada');
     }
 }

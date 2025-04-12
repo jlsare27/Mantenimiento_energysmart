@@ -4,10 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Recommendation extends Model
+class EnergyConsumption extends Model
 {
     protected $fillable = [
-        'type', 'description', 'priority', 'implemented', 'potential_savings'
+        'period_date', 'total_consumption', 'estimated_cost', 'breakdown'
+    ];
+    
+    protected $casts = [
+        'breakdown' => 'array',
     ];
     
     public function home()

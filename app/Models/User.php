@@ -9,6 +9,16 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
+
+    public function homes()
+    {
+        return $this->hasMany(Home::class);
+    }
+    
+    public function goals()
+    {
+        return $this->hasMany(Goal::class);
+    }
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 

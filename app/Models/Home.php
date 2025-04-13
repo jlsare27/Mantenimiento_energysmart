@@ -3,52 +3,41 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Home extends Model
 {
     protected $fillable = [
-        'user_id',
-        'location',
-        'general_characteristics',
-        'connection_type',
-        'tariff_id',
+        'name', 'address', 'city', 'state', 'zip_code',
+        'connection_type', 'occupants', 'area', 'energy_tariff'
     ];
-
-    // Relación con el usuario
-    public function user(): BelongsTo
+    
+    public function user()
     {
         return $this->belongsTo(User::class);
     }
-
-    // Relación con electrodomésticos
-    public function appliances(): HasMany
+    
+    public function appliances()
     {
         return $this->hasMany(Appliance::class);
     }
-
-    // Relación con iluminación
-    public function lightings(): HasMany
+    
+    public function lightings()
     {
         return $this->hasMany(Lighting::class);
     }
     
-    // Relación con el historial de consumo
-    public function consumptionHistories(): HasMany
+    public function energyConsumptions()
     {
-        return $this->hasMany(ConsumptionHistory::class);
+        return $this->hasMany(EnergyConsumption::class);
     }
-
-    // Relación con recomendaciones
-    public function recommendations(): HasMany
+    
+    public function recommendations()
     {
         return $this->hasMany(Recommendation::class);
     }
-
-    // Relación con tarifa (si se asigna manualmente)
-    public function tariff(): BelongsTo
+    
+    public function goals()
     {
-        return $this->belongsTo(Tariff::class);
+        return $this->hasMany(Goal::class);
     }
 }

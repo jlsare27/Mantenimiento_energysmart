@@ -3,19 +3,21 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Lighting extends Model
 {
     protected $fillable = [
-        'home_id',
-        'bulb_type',
-        'power',
-        'quantity',
+        'type', 'power', 'quantity', 'hours_use', 'location'
     ];
-
-    public function home(): BelongsTo
+    
+    public function home()
     {
         return $this->belongsTo(Home::class);
+    }
+    
+    // Calcula el consumo diario en kWh
+    public function getDailyConsumptionAttribute()
+    {
+        return ($this->power * $this->hours_use * $this->quantity) / 1000;
     }
 }
